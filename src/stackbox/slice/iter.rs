@@ -12,7 +12,31 @@ impl<'frame, Item : 'frame> Iterator for Iter<'frame, Item> {
     fn next (self: &'_ mut Iter<'frame, Item>)
       -> Option<Item>
     {
-        self.0.stackbox_pop()
+        self.0.stackbox_pop_first()
+    }
+
+    #[inline]
+    fn size_hint(self: &'_ Iter<'frame, Item>)
+      -> (usize, Option<usize>)
+    {
+        (self.0.len(), Some(self.0.len()))
+    }
+}
+
+impl<'frame, Item: 'frame> ExactSizeIterator for Iter<'frame, Item> {
+    #[inline]
+    fn len(&self)
+      -> usize
+    {
+        self.0.len()
+    }
+}
+
+impl<'frame, Item: 'frame> DoubleEndedIterator for Iter<'frame, Item> {
+    fn next_back(&mut self)
+      -> Option<Self::Item>
+    {
+        self.0.stackbox_pop_last()
     }
 }
 

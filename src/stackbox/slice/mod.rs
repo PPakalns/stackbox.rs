@@ -1,7 +1,31 @@
+//! Uninteresting module just to expose slice-specific helper types.
+
 use super::*;
 
-pub
+pub use iter::Iter;
 mod iter;
+
+impl<'frame, Item : 'frame> Default for StackBox<'frame, [Item; 0]> {
+    fn default()
+      -> Self
+    {
+        unsafe {
+            // Safety: empty slice.
+            StackBox::assume_owns_all(&mut [])
+        }
+            .try_into()
+            .unwrap()
+    }
+}
+
+impl<'frame, Item : 'frame> Default for StackBox<'frame, [Item]> {
+    fn default()
+      -> Self
+    {
+        StackBox::<[_; 0]>::default()
+            .into_slice()
+    }
+}
 
 impl<'frame, Item : 'frame> StackBox<'frame, [Item]> {
     /// # Safety
@@ -19,24 +43,53 @@ impl<'frame, Item : 'frame> StackBox<'frame, [Item]> {
         StackBox::assume_owns(slice)
     }
 
-    /// [`Vec`]-like behavior for [`StackBox`]: pop its first item.
+    /// [`VecDeque`][::alloc::collections::VecDeque]-like behavior for
+    /// [`StackBox`]: pop its first item.
+    ///
+    /// ```
+    /// use ::stackbox::prelude::*;
+    /// let slot = &mut mk_slot();
+    /// let arr = slot.stackbox([0, 1, 2]);
+    /// let mut slice = arr.into_slice();
+    /// assert_eq!(slice.stackbox_pop_first(), Some(0));
+    /// ```
     pub
-    fn stackbox_pop (self: &'_ mut StackBox<'frame, [Item]>)
+    fn stackbox_pop_first(self: &'_ mut StackBox<'frame, [Item]>)
       -> Option<Item>
     {
         if self.is_empty() {
             return None;
         }
-        let placeholder = unsafe {
-            // Safety: empty slice.
-            StackBox::assume_owns_all(&mut [])
-        };
-        let this = ::core::mem::replace(self, placeholder);
+        let this = ::core::mem::take(self);
         let (hd, tl) = this.stackbox_split_at(1);
         *self = tl;
-        Some(unsafe {
-            ::core::ptr::read(&ManuallyDrop::new(hd)[0])
-        })
+        let [item] = StackBox::<[_; 1]>::into_inner(hd.try_into().unwrap());
+        Some(item)
+    }
+
+    /// [`VecDeque`][::alloc::collections::VecDeque]-like behavior for
+    /// [`StackBox`]: pop its last item.
+    ///
+    /// ```
+    /// use ::stackbox::prelude::*;
+    /// let slot = &mut mk_slot();
+    /// let arr = slot.stackbox([0, 1, 2]);
+    /// let mut slice = arr.into_slice();
+    /// assert_eq!(slice.stackbox_pop_last(), Some(2));
+    /// ```
+    pub
+    fn stackbox_pop_last(self: &'_ mut StackBox<'frame, [Item]>)
+      -> Option<Item>
+    {
+        if self.is_empty() {
+            return None;
+        }
+        let len = self.len();
+        let this = ::core::mem::take(self);
+        let (hd, tl) = this.stackbox_split_at(len - 1);
+        *self = hd;
+        let [item] = StackBox::<[_; 1]>::into_inner(tl.try_into().unwrap());
+        Some(item)
     }
 
     /// [`StackBox`] / owned equivalent of the `slice` splitting methods.
@@ -73,29 +126,8 @@ impl<'frame, Item : 'frame> StackBox<'frame, [Item]> {
     }
 }
 
-pub
-trait IsArray<'frame> : 'frame {
-    type Item : 'frame;
-
-    fn into_slice (this: StackBox<'frame, Self>)
-      -> StackBox<'frame, [Self::Item]>
-    ;
-}
-
-/// `Array = [Array::Item; N]`.
-impl<'frame, Array : IsArray<'frame>> StackBox<'frame, Array> {
+impl<'frame, Item : 'frame, const N: usize> StackBox<'frame, [Item; N]> {
     /// Coerces a `StackBox<[T; N]>` into a `StackBox<[T]>`.
-    ///
-    /// ### Requirements
-    ///
-    ///   - Either the `"const-generics"` feature needs to be enabled,
-    ///
-    ///   - Or `N` must be one of the hard-coded ones:
-    ///
-    ///       - a power of `2` up to `4096`;
-    ///
-    ///       - some other psychological numbers
-    ///         (some multiples of 25, 50 or 100).
     ///
     ///   - Note that you may not need to use `.into_slice()` if instead of
     ///     [`StackBox::new_in`] you use [`stackbox!`] to construct it:
@@ -108,93 +140,97 @@ impl<'frame, Array : IsArray<'frame>> StackBox<'frame, Array> {
     ///     let mut boxed_slice: StackBox<'_, [String]> = stackbox!(slot, [
     ///         "Hello, World!".into()
     ///     ]);
-    ///     let _: String = boxed_slice.stackbox_pop().unwrap();
+    ///     let _: String = boxed_slice.stackbox_pop_first().unwrap();
     ///     ```
     #[inline]
     pub
-    fn into_slice (self: StackBox<'frame, Array>)
-      -> StackBox<'frame, [Array::Item]>
+    fn into_slice(self: StackBox<'frame, [Item; N]>)
+      -> StackBox<'frame, [Item]>
     {
-        IsArray::into_slice(self)
+        unsafe {
+            let ptr: ptr::NonNull<[Item; N]> =
+                <*const _>::read(
+                    &::core::mem::ManuallyDrop::new(self).unique_ptr
+                )
+                    .into_raw_nonnull()
+            ;
+            let ptr: ptr::NonNull<[Item]> = ptr;
+            StackBox {
+                unique_ptr: ptr::Unique::from_raw(ptr.as_ptr()),
+                _covariant_lt: <_>::default(),
+            }
+        }
     }
 }
 
-macro_rules! impl_for_Ns {(
-    $(
-        $(@for [$($generics:tt)*])?
-        $N:expr
-    ),+ $(,)?
-) => (
-    $(
-        impl<'frame, Item : 'frame $(, $($generics)*)?>
-            IsArray<'frame>
-        for
-            [Item; $N]
-        {
-            type Item = Item;
-
-            #[inline]
-            fn into_slice (this: StackBox<'frame, [Item; $N]>)
-              -> StackBox<'frame, [Item]>
-            {
-                unsafe {
-                    let ptr: *mut [Item; $N] =
-                        <*const _>::read(&
-                            ::core::mem::ManuallyDrop::new(this).unique_ptr
-                        )
-                            .into_raw_nonnull()
-                            .as_ptr()
-                    ;
-                    let ptr: *mut [Item   ] = ptr;
-                    StackBox {
-                        unique_ptr: ptr::Unique::from_raw(ptr),
-                        _covariant_lt: Default::default(),
-                    }
-                }
-            }
+impl<'frame, Item : 'frame> StackBox<'frame, [Item; 1]> {
+    /// Convert a [`StackBox`] 1-array into a [`StackBox`] of its single item.
+    #[inline]
+    pub
+    fn stackbox_unwrap_1_array(self: StackBox<'frame, [Item; 1]>)
+      -> StackBox<'frame, Item>
+    {
+        unsafe {
+            // Safety: same layout, validity and safety invariants.
+            ::core::mem::transmute(self)
         }
-    )+
-)}
-
-#[cfg(feature = "const-generics")]
-const _: () = {
-    impl_for_Ns! {
-        @for [const N: usize] N
     }
-};
+}
 
-#[cfg(not(feature = "const-generics"))]
-const _: () = {
-    impl_for_Ns! {
-        /* Is this a drawing of a flag? */
-        00, 01, 02, 03, 04, 05, 06, 07,
-        08, 09, 10, 11, 12, 13, 14, 15,
-        16, 17, 18, 19, 20, 21, 22, 23,
-        24, 25, 26, 27, 28, 29, 30, 31,
-        32, 33, 34, 35, 36, 37, 38, 39,
-        40, 41, 42, 43, 44, 45, 46, 47,
-        48, 49, 50, 51, 52, 53, 54, 55,
-        56, 57, 58, 59, 60, 61, 62, 63,
-        64,
-        75,
-        96,
-       100,
-       125,
-       128,
-       150,
-       175,
-       192,
-       200,
-       250,
-       256,
-       300,
-       400,
-       500,
-       512,
-       750,
-      1000,
-      1024,
-      2048,
-      4096,
+impl<'frame, Item : 'frame, const N: usize>
+    ::core::convert::TryFrom<StackBox<'frame, [Item]>>
+for
+    StackBox<'frame, [Item; N]>
+{
+    type Error = TryFromSliceError<StackBox<'frame, [Item]>>;
+
+    #[inline]
+    fn try_from(
+        stackbox: StackBox<'frame, [Item]>,
+    ) -> Result<StackBox<'frame, [Item; N]>, Self::Error>
+    {
+        if stackbox.len() != N {
+            return Err(TryFromSliceError(stackbox));
+        }
+        Ok(unsafe {
+            let wide_ptr: *mut [Item] =
+                <*const _>::read(
+                    &::core::mem::ManuallyDrop::new(stackbox).unique_ptr
+                )
+                    .into_raw_nonnull()
+                    .as_ptr()
+            ;
+            let thin_ptr: *mut [Item; N] = wide_ptr as _;
+            StackBox {
+                unique_ptr: ptr::Unique::from_raw(thin_ptr),
+                _covariant_lt: <_>::default(),
+            }
+        })
     }
-};
+}
+
+#[non_exhaustive]
+pub
+struct TryFromSliceError<T>(
+    pub T,
+    // non_exhaustive,
+);
+
+impl<T> ::core::fmt::Display for TryFromSliceError<T> {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>)
+      -> ::core::fmt::Result
+    {
+        "could not convert slice to array".fmt(f)
+    }
+}
+
+impl<T> ::core::fmt::Debug for TryFromSliceError<T> {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>)
+      -> ::core::fmt::Result
+    {
+        f.debug_struct("TryFromSliceError").finish_non_exhaustive()
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T> ::std::error::Error for TryFromSliceError<T> {}

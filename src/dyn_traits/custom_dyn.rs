@@ -880,3 +880,6 @@ macro_rules! custom_dyn {(
     $pub
     dyn $($rest)*
 })}
+
+#[cfg(doc)]
+use custom_dyn;

@@ -4,6 +4,7 @@ use crate::{prelude::*,
     Slot,
 };
 
+pub
 mod slice;
 
 /// Stack<sup>1</sup>-allocated `Box`. Think of this as of `&'frame mut T`, but

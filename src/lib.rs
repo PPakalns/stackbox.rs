@@ -1,16 +1,9 @@
 //! [`StackBox`]: `StackBox`
 //!
-#![cfg_attr(feature = "docs",
-    feature(external_doc),
-    doc(include = "../README.md"),
-)]
+#![doc = include_str!("../README.md")]
 #![cfg_attr(
     not(any(doc, feature = "std", test)),
     no_std,
-)]
-#![cfg_attr(
-    feature = "const-generics",
-    feature(min_const_generics),
 )]
 
 #![allow(unused_parens)]
@@ -33,7 +26,7 @@ mod ptr;
 pub use slot::{mk_slot, Slot};
 mod slot;
 
-pub use stackbox_mod::StackBox;
+pub use stackbox_mod::{StackBox, slice};
 #[path = "stackbox/mod.rs"]
 mod stackbox_mod;
 
