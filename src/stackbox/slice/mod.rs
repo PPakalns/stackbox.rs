@@ -1,6 +1,8 @@
+//! Uninteresting module just to expose slice-specific helper types.
+
 use super::*;
 
-pub
+pub use iter::Iter;
 mod iter;
 
 impl<'frame, Item : 'frame> Default for StackBox<'frame, [Item; 0]> {

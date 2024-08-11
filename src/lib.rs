@@ -26,7 +26,7 @@ mod ptr;
 pub use slot::{mk_slot, Slot};
 mod slot;
 
-pub use stackbox_mod::StackBox;
+pub use stackbox_mod::{StackBox, slice};
 #[path = "stackbox/mod.rs"]
 mod stackbox_mod;
 
