@@ -49,16 +49,11 @@ impl<'frame, Item : 'frame> StackBox<'frame, [Item]> {
         if self.is_empty() {
             return None;
         }
-        let placeholder = unsafe {
-            // Safety: empty slice.
-            StackBox::assume_owns_all(&mut [])
-        };
-        let this = ::core::mem::replace(self, placeholder);
+        let this = ::core::mem::take(self);
         let (hd, tl) = this.stackbox_split_at(1);
         *self = tl;
-        Some(unsafe {
-            ::core::ptr::read(&ManuallyDrop::new(hd)[0])
-        })
+        let [item] = StackBox::<[_; 1]>::into_inner(hd.try_into().unwrap());
+        Some(item)
     }
 
     /// [`StackBox`] / owned equivalent of the `slice` splitting methods.
