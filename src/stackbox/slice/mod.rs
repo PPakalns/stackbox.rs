@@ -162,7 +162,7 @@ impl<'frame, Item : 'frame, const N: usize> StackBox<'frame, [Item; N]> {
 }
 
 impl<'frame, Item : 'frame> StackBox<'frame, [Item; 1]> {
-    /// Convert a [`StackBox`] 1-array into a [`Stackbox`] of its single item.
+    /// Convert a [`StackBox`] 1-array into a [`StackBox`] of its single item.
     #[inline]
     pub
     fn stackbox_unwrap_1_array(self: StackBox<'frame, [Item; 1]>)
