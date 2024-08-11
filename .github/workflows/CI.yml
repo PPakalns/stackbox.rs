@@ -117,3 +117,21 @@ jobs:
 
       - name: Test with miri
         run: ./miri_test.sh --no-default-features ${{ matrix.feature--alloc }}
+
+  required-jobs:
+    name: 'All the required jobs'
+    needs:
+      - check
+      - build-and-test
+      - miri
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: 'Check success of the required jobs'
+        run: |
+          RESULT=$(echo "${{ join(needs.*.result, '') }}" | sed -e "s/success//g")
+          if [ -n "$RESULT" ]; then
+            echo "❌"
+            false
+          fi
+          echo "✅"
