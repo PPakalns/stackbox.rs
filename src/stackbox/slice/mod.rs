@@ -41,9 +41,18 @@ impl<'frame, Item : 'frame> StackBox<'frame, [Item]> {
         StackBox::assume_owns(slice)
     }
 
-    /// [`Vec`]-like behavior for [`StackBox`]: pop its first item.
+    /// [`VecDeque`][::alloc::collections::VecDeque]-like behavior for
+    /// [`StackBox`]: pop its first item.
+    ///
+    /// ```
+    /// use ::stackbox::prelude::*;
+    /// let slot = &mut mk_slot();
+    /// let arr = slot.stackbox([0, 1, 2]);
+    /// let mut slice = arr.into_slice();
+    /// assert_eq!(slice.stackbox_pop_first(), Some(0));
+    /// ```
     pub
-    fn stackbox_pop (self: &'_ mut StackBox<'frame, [Item]>)
+    fn stackbox_pop_first(self: &'_ mut StackBox<'frame, [Item]>)
       -> Option<Item>
     {
         if self.is_empty() {
@@ -104,7 +113,7 @@ impl<'frame, Item : 'frame, const N: usize> StackBox<'frame, [Item; N]> {
     ///     let mut boxed_slice: StackBox<'_, [String]> = stackbox!(slot, [
     ///         "Hello, World!".into()
     ///     ]);
-    ///     let _: String = boxed_slice.stackbox_pop().unwrap();
+    ///     let _: String = boxed_slice.stackbox_pop_first().unwrap();
     ///     ```
     #[inline]
     pub
