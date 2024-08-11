@@ -382,11 +382,12 @@ for
         let new_ptr = self
             .into_inner_unique()
             .into_raw_nonnull()
+            .as_mut()
             .replace_ptr(new);
 
         // Safety: we've forgotten the old pointer and this is the correctly unsized old pointer so
         // valid for the pointed-to memory.
-        let unique_ptr = ptr::Unique::from_raw(new_ptr.as_ptr());
+        let unique_ptr = ptr::Unique::from_raw(new_ptr);
 
         StackBox {
             unique_ptr,
