@@ -1,7 +1,6 @@
 use crate::{prelude::*, ptr, Slot};
 use ::core::mem::ManuallyDrop;
 
-pub use slice::iter;
 mod slice;
 
 /// Stack<sup>1</sup>-allocated `Box`. Think of this as of `&'frame mut T`, but
@@ -278,6 +277,7 @@ impl<'frame, T: ?Sized + 'frame> StackBox<'frame, T> {
         }
     }
 
+    #[cfg(feature = "unsize")]
     #[inline]
     pub(crate) fn into_inner_unique(self) -> ptr::Unique<T> {
         let this = ManuallyDrop::new(self);

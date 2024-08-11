@@ -112,7 +112,7 @@ mod my_test {
         }
 
         let not_send = 42;
-        stackbox!(let f = |_: &str| drop(not_send));
+        stackbox!(let f = |_: &str| { let _ = (not_send, ); });
         let f: StackBoxDynFnOnceRef<'_, str, dyn Send + Sync> = f.into_dyn();
         let f = |s: &str| f.call(s);
         f("");
