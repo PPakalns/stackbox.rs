@@ -32,11 +32,13 @@
 //!
 //! [`custom_dyn!`]: `crate::custom_dyn`
 
-pub mod any;
+pub
+mod any;
 
 mod custom_dyn;
 
-pub mod fn_once;
+pub
+mod fn_once;
 
 use crate::{
     marker::{NoAutoTraits, Sendness, Syncness},
@@ -44,23 +46,27 @@ use crate::{
 };
 use ::core::ptr;
 
-mod ty {
-    pub struct Erased(());
-}
+mod ty { pub struct Erased(()); }
 
-pub(crate) mod __ {
-    pub trait DynCoerce<StackBoxImplTrait> {
-        fn fatten(it: StackBoxImplTrait) -> Self /* StackBoxDynTrait */;
+pub(in crate)
+mod __ {
+    pub
+    trait DynCoerce<StackBoxImplTrait> {
+        fn fatten (it: StackBoxImplTrait)
+          -> Self /* StackBoxDynTrait */
+        ;
     }
 }
 use __::DynCoerce;
 
-impl<'frame, ImplTrait: 'frame> StackBox<'frame, ImplTrait> {
+impl<'frame, ImplTrait : 'frame> StackBox<'frame, ImplTrait> {
     /// Coerces a `StackBox<impl Trait>` into a `StackBox<dyn Trait>`, provided
     /// the `Trait` is [one of the supported ones][`self`].
-    pub fn into_dyn<StackBoxDynTrait>(self: StackBox<'frame, ImplTrait>) -> StackBoxDynTrait
+    pub
+    fn into_dyn<StackBoxDynTrait> (self: StackBox<'frame, ImplTrait>)
+      -> StackBoxDynTrait
     where
-        StackBoxDynTrait: DynCoerce<StackBox<'frame, ImplTrait>>,
+        StackBoxDynTrait : DynCoerce<StackBox<'frame, ImplTrait>>,
     {
         DynCoerce::fatten(self)
     }
@@ -94,7 +100,8 @@ mod my_test {
     }
 
     #[test]
-    fn fn_once_higher_order_param() {
+    fn fn_once_higher_order_param ()
+    {
         custom_dyn! {
             dyn FnOnceRef<Arg> : FnOnce(&Arg)
             where {
@@ -119,7 +126,8 @@ mod my_test {
     }
 
     #[test]
-    fn manual_any_non_owned_receiver() {
+    fn manual_any_non_owned_receiver ()
+    {
         use ::core::any;
         custom_dyn! {
             dyn Any<'__> : any::Any

@@ -1,7 +1,8 @@
 mod sealed {
     use super::*;
 
-    pub trait RepresentsAutoTraits {}
+    pub
+    trait RepresentsAutoTraits {}
 
     impl RepresentsAutoTraits for dyn Send + 'static {}
     impl RepresentsAutoTraits for dyn Sync + 'static {}
@@ -9,9 +10,15 @@ mod sealed {
     impl RepresentsAutoTraits for NoAutoTraits {}
 }
 
-pub struct NoAutoTraits(PhantomNotSendNorSync, ::core::convert::Infallible);
+pub
+struct NoAutoTraits (
+    PhantomNotSendNorSync,
+    ::core::convert::Infallible,
+);
 
-type PhantomNotSendNorSync = ::core::marker::PhantomData<*mut ()>;
+type PhantomNotSendNorSync =
+    ::core::marker::PhantomData<*mut ()>
+;
 
 // struct PhantomNotSend(PhantomNotSendNorSync);
 // unsafe // Safety: no API whatsoever.
@@ -35,12 +42,13 @@ type PhantomNotSendNorSync = ::core::marker::PhantomData<*mut ()>;
 /// }
 /// # } fn main () {}
 /// ```
-#[doc(hidden)]
-#[allow(nonstandard_style)]
-pub mod Sendness {
+#[doc(hidden)] #[allow(nonstandard_style)]
+pub
+mod Sendness {
     use super::*;
 
-    pub trait T: sealed::RepresentsAutoTraits {}
+    pub
+    trait T : sealed::RepresentsAutoTraits {}
 
     impl T for dyn Send {}
     impl T for dyn Sync {}
@@ -62,12 +70,13 @@ pub mod Sendness {
 /// }
 /// # } fn main () {}
 /// ```
-#[doc(hidden)]
-#[allow(nonstandard_style)]
-pub mod Syncness {
+#[doc(hidden)] #[allow(nonstandard_style)]
+pub
+mod Syncness {
     use super::*;
 
-    pub trait T: sealed::RepresentsAutoTraits {}
+    pub
+    trait T : sealed::RepresentsAutoTraits {}
 
     impl T for dyn Send {}
     impl T for dyn Sync {}

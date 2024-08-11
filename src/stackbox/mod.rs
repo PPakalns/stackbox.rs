@@ -1,5 +1,8 @@
-use crate::{prelude::*, ptr, Slot};
 use ::core::mem::ManuallyDrop;
+use crate::{prelude::*,
+    ptr,
+    Slot,
+};
 
 mod slice;
 
@@ -139,17 +142,18 @@ mod slice;
 /// // …
 /// f.call();
 /// ```
-// TYPE INVARIANTS:
-//   - See the `# Safety` section of [`StackBox::assume_owns`].
+    // TYPE INVARIANTS:
+    //   - See the `# Safety` section of [`StackBox::assume_owns`].
 #[repr(transparent)]
-pub struct StackBox<'frame, T: ?Sized + 'frame> {
+pub
+struct StackBox<'frame, T : ?Sized + 'frame> {
     /// Covariant and non-null and, ideally, tagged as unaliased.
     unique_ptr: ptr::Unique<T>,
     /// Covariant lifetime (this is an `&'frame mut MD<T>`, afterall).
     _covariant_lt: ::core::marker::PhantomData<&'frame ()>,
 }
 
-impl<'frame, T: 'frame> StackBox<'frame, T> {
+impl<'frame, T : 'frame> StackBox<'frame, T> {
     /// # Main non-`unsafe` non-macro non-callback constructor.
     ///
     /// To be used most of the time (when `T : Sized`, and when no implicit
@@ -174,7 +178,10 @@ impl<'frame, T: 'frame> StackBox<'frame, T> {
     /// assert_eq!(*boxed, 42);
     /// ```
     #[inline(always)]
-    pub fn new_in(slot: &'frame mut Slot<T>, value: T) -> StackBox<'frame, T> {
+    pub
+    fn new_in (slot: &'frame mut Slot<T>, value: T)
+      -> StackBox<'frame, T>
+    {
         slot.stackbox(value)
     }
 
@@ -218,7 +225,8 @@ impl<'frame, T: 'frame> StackBox<'frame, T> {
     /// # } fn main () {}
     /// ```
     #[inline]
-    pub fn with_new<R, F>(value: T, ret: F) -> R
+    pub
+    fn with_new<R, F> (value: T, ret: F) -> R
     where
         F: for<'local> FnOnce(StackBox<'local, T>) -> R,
     {
@@ -233,7 +241,10 @@ impl<'frame, T: 'frame> StackBox<'frame, T> {
     /// thus be reused to create another [`StackBox`].
     // Note: `self` receiver is fine because there is no `DerefMove` yet.
     #[inline]
-    pub fn into_inner(self: StackBox<'frame, T>) -> T {
+    pub
+    fn into_inner (self: StackBox<'frame, T>)
+      -> T
+    {
         unsafe {
             // Safety: from the type invariant.
 
@@ -245,7 +256,7 @@ impl<'frame, T: 'frame> StackBox<'frame, T> {
     }
 }
 
-impl<'frame, T: ?Sized + 'frame> StackBox<'frame, T> {
+impl<'frame, T : ?Sized + 'frame> StackBox<'frame, T> {
     /// Raw `unsafe` constructor, by taking ownership of a borrowing pointer.
     ///
     /// # Safety
@@ -270,7 +281,11 @@ impl<'frame, T: ?Sized + 'frame> StackBox<'frame, T> {
     ///
     ///   - Or the [`stackbox!`] macro, for most usages.
     #[inline]
-    pub unsafe fn assume_owns(it: &'frame mut ManuallyDrop<T>) -> StackBox<'frame, T> {
+    pub
+    unsafe
+    fn assume_owns (it: &'frame mut ManuallyDrop<T>)
+      -> StackBox<'frame, T>
+    {
         Self {
             unique_ptr: ptr::Unique::<T>::from_raw(&mut **it),
             _covariant_lt: Default::default(),
@@ -279,7 +294,10 @@ impl<'frame, T: ?Sized + 'frame> StackBox<'frame, T> {
 
     #[cfg(feature = "unsize")]
     #[inline]
-    pub(crate) fn into_inner_unique(self) -> ptr::Unique<T> {
+    pub(in crate)
+    fn into_inner_unique(self)
+        -> ptr::Unique<T>
+    {
         let this = ManuallyDrop::new(self);
         unsafe {
             // Safety: moving out of this which is not dropped.
@@ -289,25 +307,38 @@ impl<'frame, T: ?Sized + 'frame> StackBox<'frame, T> {
     }
 }
 
-impl<'frame, T: ?Sized + 'frame> ::core::ops::Deref for StackBox<'frame, T> {
+impl<'frame, T : ?Sized + 'frame>
+    ::core::ops::Deref
+for
+    StackBox<'frame, T>
+{
     type Target = T;
 
     #[inline]
-    fn deref(self: &'_ StackBox<'frame, T>) -> &'_ T {
+    fn deref (self: &'_ StackBox<'frame, T>)
+      -> &'_ T
+    {
         &*self.unique_ptr
     }
 }
 
-impl<'frame, T: ?Sized + 'frame> ::core::ops::DerefMut for StackBox<'frame, T> {
+impl<'frame, T : ?Sized + 'frame>
+    ::core::ops::DerefMut
+for
+    StackBox<'frame, T>
+{
     #[inline]
-    fn deref_mut(self: &'_ mut StackBox<'frame, T>) -> &'_ mut T {
+    fn deref_mut (self: &'_ mut StackBox<'frame, T>)
+      -> &'_ mut T
+    {
         &mut *self.unique_ptr
     }
 }
 
-impl<T: ?Sized> Drop for StackBox<'_, T> {
+impl<T : ?Sized> Drop for StackBox<'_, T> {
     #[inline]
-    fn drop(self: &'_ mut Self) {
+    fn drop (self: &'_ mut Self)
+    {
         unsafe {
             // # Safety
             //
@@ -332,8 +363,10 @@ impl<T: ?Sized> Drop for StackBox<'_, T> {
 ///
 /// let display: StackBox<dyn Display> = num.unsize(Coercion::to_display());
 /// ```
-unsafe impl<'frame, T: 'frame, U: ?Sized + 'frame> ::unsize::CoerciblePtr<U>
-    for StackBox<'frame, T>
+unsafe impl<'frame, T : 'frame, U: ?Sized + 'frame>
+    ::unsize::CoerciblePtr<U>
+for
+    StackBox<'frame, T>
 {
     type Pointee = T;
     type Output = StackBox<'frame, U>;
@@ -345,7 +378,10 @@ unsafe impl<'frame, T: 'frame, U: ?Sized + 'frame> ::unsize::CoerciblePtr<U>
     unsafe fn replace_ptr(self, new: *mut U) -> StackBox<'frame, U> {
         let _covariant_lt = self._covariant_lt;
 
-        let new_ptr = self.into_inner_unique().into_raw_nonnull().replace_ptr(new);
+        let new_ptr = self
+            .into_inner_unique()
+            .into_raw_nonnull()
+            .replace_ptr(new);
 
         // Safety: we've forgotten the old pointer and this is the correctly unsized old pointer so
         // valid for the pointed-to memory.
