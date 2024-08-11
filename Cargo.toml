@@ -38,14 +38,12 @@ optional = true
 alloc = []
 std = ["alloc"]
 
-const-generics = []
-
 default = ["alloc"]
 
 docs = []
 
 [dev-dependencies]
-with_locals = "0.3.0-rc1"
+with_locals = "0.3.3"
 
 [package.metadata.docs.rs]
 all-features = true
