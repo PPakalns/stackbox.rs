@@ -37,7 +37,6 @@ jobs:
             --tests
             --no-default-features
             ${{ matrix.feature--alloc-or-std }}
-            ${{ matrix.feature--const-generics }}
 
   # == BUILD & TEST == #
   build-and-test:
@@ -79,7 +78,6 @@ jobs:
       fail-fast: false
       matrix:
         feature--alloc-or-std: ['', '--features alloc', '--features std']
-        feature--const-generics: ['', '--features const-generics']
     steps:
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -100,7 +98,6 @@ jobs:
             --no-default-features
             --features docs
             ${{ matrix.feature--alloc-or-std }}
-            ${{ matrix.feature--const-generics }}
             -- --nocapture
 
   # == MIRI == #
