@@ -3,6 +3,28 @@ use super::*;
 pub
 mod iter;
 
+impl<'frame, Item : 'frame> Default for StackBox<'frame, [Item; 0]> {
+    fn default()
+      -> Self
+    {
+        unsafe {
+            // Safety: empty slice.
+            StackBox::assume_owns_all(&mut [])
+        }
+            .try_into()
+            .unwrap()
+    }
+}
+
+impl<'frame, Item : 'frame> Default for StackBox<'frame, [Item]> {
+    fn default()
+      -> Self
+    {
+        StackBox::<[_; 0]>::default()
+            .into_slice()
+    }
+}
+
 impl<'frame, Item : 'frame> StackBox<'frame, [Item]> {
     /// # Safety
     ///
