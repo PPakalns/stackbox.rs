@@ -65,6 +65,31 @@ impl<'frame, Item : 'frame> StackBox<'frame, [Item]> {
         Some(item)
     }
 
+    /// [`VecDeque`][::alloc::collections::VecDeque]-like behavior for
+    /// [`StackBox`]: pop its last item.
+    ///
+    /// ```
+    /// use ::stackbox::prelude::*;
+    /// let slot = &mut mk_slot();
+    /// let arr = slot.stackbox([0, 1, 2]);
+    /// let mut slice = arr.into_slice();
+    /// assert_eq!(slice.stackbox_pop_last(), Some(2));
+    /// ```
+    pub
+    fn stackbox_pop_last(self: &'_ mut StackBox<'frame, [Item]>)
+      -> Option<Item>
+    {
+        if self.is_empty() {
+            return None;
+        }
+        let len = self.len();
+        let this = ::core::mem::take(self);
+        let (hd, tl) = this.stackbox_split_at(len - 1);
+        *self = hd;
+        let [item] = StackBox::<[_; 1]>::into_inner(tl.try_into().unwrap());
+        Some(item)
+    }
+
     /// [`StackBox`] / owned equivalent of the `slice` splitting methods.
     #[inline]
     pub
