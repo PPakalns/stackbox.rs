@@ -89,19 +89,19 @@ impl<T> Slot<T> {
 /// Convenience macro to batch-create multiple [`Slot`]s.
 ///
 /// ```rust
-/// # use ::stackbox::prelude::*;
+/// # use ::stackbox_2::prelude::*;
 /// mk_slots!(foo, bar, baz);
-/// # drop::<[&mut ::stackbox::Slot<()>; 3]>([foo, bar, baz]);
+/// # drop::<[&mut ::stackbox_2::Slot<()>; 3]>([foo, bar, baz]);
 /// ```
 ///
 /// is a shorthand for multiple [`mk_slot()`][`mk_slot`] calls:
 ///
 /// ```rust
-/// # use ::stackbox::prelude::*;
+/// # use ::stackbox_2::prelude::*;
 /// let foo = &mut mk_slot();
 /// let bar = &mut mk_slot();
 /// let baz = &mut mk_slot();
-/// # drop::<[&mut ::stackbox::Slot<()>; 3]>([foo, bar, baz]);
+/// # drop::<[&mut ::stackbox_2::Slot<()>; 3]>([foo, bar, baz]);
 /// ```
 ///
 /// A so-created `&mut Slot<T>` is then to be used to derive a

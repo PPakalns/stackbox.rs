@@ -59,7 +59,7 @@ mod tests {
     #[test]
     fn doctest_for_miri ()
     {
-        use ::stackbox::prelude::*;
+        use ::stackbox_2::prelude::*;
 
         stackbox!(let boxed_slice: StackBox<'_, [_]> = [
             String::from("Hello, "),

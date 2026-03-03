@@ -543,7 +543,7 @@ a C++ template of sorts, we could say 😄
 The following example fails to compile:
 
 ```rust,compile_fail
-use ::stackbox::prelude::*;
+use ::stackbox_2::prelude::*;
 
 //                       `f: StackBox<dyn FnOnce(&'arg str) -> ()>`
 fn call_with_local<'arg> (f: StackBoxDynFnOnce_1<&'arg str, ()>)
@@ -590,7 +590,7 @@ The solution is to define a new `DynFnOnce...` trait, which involves a
 higher-order lifetime in the signature:
 
 ```rust
-use ::stackbox::prelude::*;
+use ::stackbox_2::prelude::*;
 
 custom_dyn! {
     pub

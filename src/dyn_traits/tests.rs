@@ -179,7 +179,7 @@ mod fn_once {
 
 mod custom_dyn {
     use super::compile_fail;
-    use ::stackbox::prelude::*;
+    use ::stackbox_2::prelude::*;
 
     mod fn_once {
         use super::*;
@@ -299,7 +299,7 @@ mod custom_dyn {
                 $($input:tt)*
             ) => (
                 custom_dyn! {@as_item
-                    ::stackbox::prelude::custom_dyn! {
+                    ::stackbox_2::prelude::custom_dyn! {
                         $($input)*
                     }
                 }
@@ -361,7 +361,7 @@ macro_rules! compile_fail {(#[doc = $doc:expr] $item:item) => (#[doc = $doc] $it
                 "compile_fail", /* Comment to show the error messages */
             "\n",
             stringify! {
-                use ::stackbox::prelude::*;
+                use ::stackbox_2::prelude::*;
 
                 fn main ()
                 {

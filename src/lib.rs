@@ -14,7 +14,7 @@
 extern crate alloc;
 
 #[cfg(test)]
-extern crate self as stackbox;
+extern crate self as stackbox_2;
 
 pub
 mod dyn_traits;

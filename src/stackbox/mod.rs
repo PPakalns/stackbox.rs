@@ -49,7 +49,7 @@ mod slice;
 ///
 /// ```rust
 /// # use ::core::mem::drop as stuff;
-/// use ::stackbox::prelude::*;
+/// use ::stackbox_2::prelude::*;
 ///
 /// stackbox!(let boxed_slice: StackBox<'_, [_]> = [
 ///     String::from("Hello, "),
@@ -67,7 +67,7 @@ mod slice;
 ///
 ///     ```rust
 ///     # use ::core::mem::drop as stuff;
-///     use ::stackbox::prelude::*;
+///     use ::stackbox_2::prelude::*;
 ///     use ::with_locals::with;
 ///
 ///     #[with('local)]
@@ -98,7 +98,7 @@ mod slice;
 /// ```rust
 /// # use ::core::mem::drop as stuff;
 /// use ::core::mem::ManuallyDrop;
-/// use ::stackbox::prelude::*;
+/// use ::stackbox_2::prelude::*;
 ///
 /// # let some_condition = || true;
 /// mk_slots!(storage1, storage2); // uninit stack allocations.
@@ -127,7 +127,7 @@ mod slice;
 /// See the [dedicated module for more info][`crate::dyn_traits`].
 ///
 /// ```rust
-/// use ::stackbox::prelude::*;
+/// use ::stackbox_2::prelude::*;
 /// # let some_condition = || true;
 ///
 /// mk_slots!(f1, f2);
@@ -168,7 +168,7 @@ impl<'frame, T : 'frame> StackBox<'frame, T> {
     /// ## Example
     ///
     /// ```rust
-    /// use ::stackbox::prelude::*;
+    /// use ::stackbox_2::prelude::*;
     ///
     /// let slot = &mut mk_slot();
     /// let boxed = if true {
@@ -194,7 +194,7 @@ impl<'frame, T : 'frame> StackBox<'frame, T> {
     /// ## Example
     ///
     /// ```rust
-    /// use ::stackbox::prelude::*;
+    /// use ::stackbox_2::prelude::*;
     ///
     /// StackBox::with_new(42, |stackbox: StackBox<'_, i32>| {
     ///     let any: StackBoxDynAny<'_> = stackbox.into_dyn();
@@ -212,7 +212,7 @@ impl<'frame, T : 'frame> StackBox<'frame, T> {
     ///
     /// ```rust
     /// # macro_rules! ignore {($($t:tt)*) => ()} ignore! {
-    /// use ::stackbox::prelude::*;
+    /// use ::stackbox_2::prelude::*;
     /// use ::with_locals::with;
     ///
     /// #[with]

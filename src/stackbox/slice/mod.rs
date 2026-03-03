@@ -47,7 +47,7 @@ impl<'frame, Item : 'frame> StackBox<'frame, [Item]> {
     /// [`StackBox`]: pop its first item.
     ///
     /// ```
-    /// use ::stackbox::prelude::*;
+    /// use ::stackbox_2::prelude::*;
     /// let slot = &mut mk_slot();
     /// let arr = slot.stackbox([0, 1, 2]);
     /// let mut slice = arr.into_slice();
@@ -71,7 +71,7 @@ impl<'frame, Item : 'frame> StackBox<'frame, [Item]> {
     /// [`StackBox`]: pop its last item.
     ///
     /// ```
-    /// use ::stackbox::prelude::*;
+    /// use ::stackbox_2::prelude::*;
     /// let slot = &mut mk_slot();
     /// let arr = slot.stackbox([0, 1, 2]);
     /// let mut slice = arr.into_slice();
@@ -133,7 +133,7 @@ impl<'frame, Item : 'frame, const N: usize> StackBox<'frame, [Item; N]> {
     ///     [`StackBox::new_in`] you use [`stackbox!`] to construct it:
     ///
     ///     ```rust
-    ///     use ::stackbox::prelude::*;
+    ///     use ::stackbox_2::prelude::*;
     ///
     ///     mk_slots!(slot);
     ///     //      boxed_slice: StackBox<'_, [String]> = StackBox::new_in(slot, [

@@ -77,7 +77,7 @@ mod tests;
 
 #[cfg(test)]
 mod my_test {
-    use ::stackbox::prelude::*;
+    use ::stackbox_2::prelude::*;
 
     /// Hack to have invocations work inside function bodies for the MSRV.
     macro_rules! custom_dyn {
@@ -92,7 +92,7 @@ mod my_test {
             $($input:tt)*
         ) => (
             custom_dyn! {@as_item
-                ::stackbox::prelude::custom_dyn! {
+                ::stackbox_2::prelude::custom_dyn! {
                     $($input)*
                 }
             }
