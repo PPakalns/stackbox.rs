@@ -1,5 +1,5 @@
 [package]
-name = "stackbox"
+name = "stackbox-2"
 version = "0.2.2"
 authors = [
     "Daniel Henry-Mantilla <daniel.henry.mantilla@gmail.com>",
@@ -8,9 +8,9 @@ edition = "2021"
 
 license = "Zlib OR MIT OR Apache-2.0"
 
-documentation = "https://docs.rs/stackbox"
-repository = "https://github.com/danielhenrymantilla/stackbox.rs"
-homepage = "https://crates.io/crates/stackbox"
+documentation = "https://docs.rs/stackbox-2"
+repository = "https://github.com/danielhenrymantilla/stackbox-2.rs"
+homepage = "https://crates.io/crates/stackbox-2"
 
 readme = "README.md"
 
